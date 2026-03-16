@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, CheckCircle2, Circle, Upload, GitPullRequest, Box, FileText, Download, Loader2, PanelRight } from 'lucide-react';
+import { ChevronRight, CheckCircle2, Circle, Upload, GitPullRequest, Box, FileText, Download, Loader2, PanelRight, Image as ImageIcon, ArrowUpCircle } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PanoramaCardType, PanoramaData } from '../types';
@@ -18,10 +18,158 @@ export default function PanoramaPanel({
   const [showEnvDetails, setShowEnvDetails] = useState(false);
   const isPreparing = panoramaState.status === 'preparing';
 
+  const getCardContent = (type: PanoramaCardType) => {
+    const data = panoramaState.data || {};
+    switch (type) {
+      case 'plan':
+        return {
+          icon: <CheckCircle2 size={18} />,
+          title: '任务步骤',
+          status: data.planStatus === 'loading' ? '生成中' : '已就绪',
+          statusColor: data.planStatus === 'loading' ? 'text-blue-500 bg-blue-50' : 'text-emerald-600 bg-emerald-50',
+          desc: `${data.plan?.filter(p => p.status === 'completed').length || 0}/${data.plan?.length || 0} 步骤已完成`,
+          isLoading: data.planStatus === 'loading'
+        };
+      case 'doc':
+        return {
+          icon: <FileText size={18} />,
+          title: '技术方案',
+          status: data.docStatus === 'loading' ? '生成中' : '已就绪',
+          statusColor: data.docStatus === 'loading' ? 'text-blue-500 bg-blue-50' : 'text-emerald-600 bg-emerald-50',
+          desc: data.docStatus === 'loading' ? '正在分析需求并生成方案' : (data.doc?.title || '技术方案文档已生成'),
+          isLoading: data.docStatus === 'loading'
+        };
+      case 'code':
+        return {
+          icon: <Upload size={18} />,
+          title: '代码变更',
+          status: data.codeStatus === 'loading' ? '修改中' : '已提交',
+          statusColor: data.codeStatus === 'loading' ? 'text-blue-500 bg-blue-50' : 'text-emerald-600 bg-emerald-50',
+          desc: data.codeStatus === 'loading' ? '正在修改代码...' : `+${data.code?.added || 0} -${data.code?.removed || 0} 行代码变更`,
+          isLoading: data.codeStatus === 'loading'
+        };
+      case 'pr':
+        let pStatus = '待创建';
+        let pColor = 'text-slate-500 bg-slate-100';
+        let pDesc = '等待代码提交后创建';
+        let pLoading = false;
+
+        if (data.prStatus === 'loading') {
+          pStatus = '创建中';
+          pColor = 'text-blue-500 bg-blue-50';
+          pDesc = '正在创建合并请求...';
+          pLoading = true;
+        } else if (data.prStatus === 'success') {
+          pStatus = 'Open';
+          pColor = 'text-emerald-600 bg-emerald-50';
+          pDesc = `#${data.pr?.id || ''} ${data.pr?.title || ''}`;
+        } else if (data.prStatus === 'merged') {
+          pStatus = 'Merged';
+          pColor = 'text-purple-600 bg-purple-50';
+          pDesc = `#${data.pr?.id || ''} ${data.pr?.title || ''}`;
+        }
+
+        return {
+          icon: <GitPullRequest size={18} />,
+          title: '合并请求',
+          status: pStatus,
+          statusColor: pColor,
+          desc: pDesc,
+          isLoading: pLoading
+        };
+      case 'deploy':
+        let dStatus = '待部署';
+        let dColor = 'text-amber-600 bg-amber-50';
+        let dDesc = '等待代码变更完成后部署';
+        let dLoading = false;
+        
+        if (data.deployStatus === 'loading') {
+          dStatus = '部署中';
+          dColor = 'text-blue-500 bg-blue-50';
+          dDesc = '正在部署至预发环境...';
+          dLoading = true;
+        } else if (data.deployStatus === 'success') {
+          dStatus = '已部署';
+          dColor = 'text-emerald-600 bg-emerald-50';
+          dDesc = '已成功部署至预发环境';
+        }
+
+        return {
+          icon: <ImageIcon size={18} />,
+          title: '部署产物',
+          status: dStatus,
+          statusColor: dColor,
+          desc: dDesc,
+          isLoading: dLoading
+        };
+      case 'ui':
+        let uStatus = '待检测';
+        let uColor = 'text-slate-500 bg-slate-100';
+        let uDesc = '等待部署完成后检测';
+        let uLoading = false;
+
+        if (data.uiStatus === 'loading') {
+          uStatus = '检测中';
+          uColor = 'text-blue-500 bg-blue-50';
+          uDesc = '正在进行 UI 自动化检测...';
+          uLoading = true;
+        } else if (data.uiStatus === 'success') {
+          uStatus = '无异常';
+          uColor = 'text-emerald-600 bg-emerald-50';
+          uDesc = 'UI 检测通过';
+        }
+
+        return {
+          icon: <ImageIcon size={18} />,
+          title: 'UI 检测',
+          status: uStatus,
+          statusColor: uColor,
+          desc: uDesc,
+          isLoading: uLoading
+        };
+      case 'promote':
+        return {
+          icon: <ArrowUpCircle size={18} />,
+          title: '迭代推进',
+          status: '就绪',
+          statusColor: 'text-emerald-600 bg-emerald-50',
+          desc: '开发环境验证通过，可推进迭代',
+          isLoading: false
+        };
+      case 'release':
+        let rStatus = '待生成';
+        let rColor = 'text-slate-500 bg-slate-100';
+        let rDesc = '等待确认发布';
+        let rLoading = false;
+
+        if (data.releaseStatus === 'loading') {
+          rStatus = '生成中';
+          rColor = 'text-blue-500 bg-blue-50';
+          rDesc = '正在生成发布计划单...';
+          rLoading = true;
+        } else if (data.releaseStatus === 'success') {
+          rStatus = '已生成';
+          rColor = 'text-emerald-600 bg-emerald-50';
+          rDesc = `版本 ${data.release?.version || ''}`;
+        }
+
+        return {
+          icon: <Box size={18} />,
+          title: '发布计划',
+          status: rStatus,
+          statusColor: rColor,
+          desc: rDesc,
+          isLoading: rLoading
+        };
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className={`${isOpen ? 'w-[340px]' : 'w-12'} bg-[#f8fafc] flex flex-col h-full shrink-0 border-l border-slate-200 transition-[width] duration-300 ease-in-out`}>
       <div className={`h-14 flex items-center shrink-0 bg-white border-b border-slate-200 ${isOpen ? 'justify-between px-4' : 'justify-center'}`}>
-        {isOpen && <span className="font-medium text-slate-800">全景概览</span>}
+        {isOpen && <span className="font-medium text-slate-800">执行预览</span>}
         <div className="flex items-center gap-2 relative">
           {isOpen && (
             isPreparing ? (
@@ -60,14 +208,14 @@ export default function PanoramaPanel({
           <button 
             onClick={onToggle} 
             className="p-1.5 hover:bg-slate-100 rounded-md text-slate-500 transition-colors"
-            title={isOpen ? "收起全景概览" : "展开全景概览"}
+            title={isOpen ? "收起状态面板" : "展开状态面板"}
           >
             {isOpen ? <ChevronRight size={18} /> : <PanelRight size={18} />}
           </button>
         </div>
       </div>
       
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 ${!isOpen ? 'hidden' : ''}`}>
+      <div className={`flex-1 overflow-y-auto p-4 space-y-3 ${!isOpen ? 'hidden' : ''}`}>
         
         <AnimatePresence>
           {isPreparing && panoramaState.visibleCards.length === 0 && (
@@ -89,196 +237,41 @@ export default function PanoramaPanel({
             </motion.div>
           )}
 
-          {/* 任务步骤 */}
-          {panoramaState.visibleCards.includes('plan') && (
-            <motion.div 
-              key="plan"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('plan')}>
-                <span className="font-medium text-slate-800 text-sm">任务步骤</span>
-                <ChevronDown size={16} className="text-slate-400" />
-              </div>
-              <div className="px-4 pb-4 space-y-3">
-                {panoramaState.data?.plan?.map((item) => (
-                  <div key={item.id} className="flex gap-2">
-                    {item.status === 'completed' ? (
-                      <CheckCircle2 size={16} className="text-slate-300 shrink-0 mt-0.5" />
-                    ) : (
-                      <Circle size={16} className="text-slate-300 shrink-0 mt-0.5" />
-                    )}
-                    <div>
-                      <div className={`text-sm ${item.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-700'}`}>
-                        {item.text}
-                      </div>
-                      {item.subtext && (
-                        <div className={`text-xs mt-0.5 ${item.status === 'completed' ? 'text-slate-400 line-through' : 'text-slate-500'}`}>
-                          {item.subtext}
-                        </div>
-                      )}
+          {panoramaState.visibleCards.map((cardType) => {
+            const config = getCardContent(cardType);
+            if (!config) return null;
+
+            return (
+              <motion.div 
+                key={cardType}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                onClick={() => onOpenDetails(cardType)}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group"
+              >
+                <div className="p-4 flex items-start gap-3">
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${config.isLoading ? 'bg-slate-100 text-slate-400' : 'bg-slate-50 text-slate-700'}`}>
+                    {config.isLoading ? <Loader2 size={20} className="animate-spin" /> : config.icon}
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="font-medium text-slate-800 text-sm">{config.title}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${config.statusColor}`}>
+                        {config.status}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500 truncate">
+                      {config.desc}
                     </div>
                   </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* 技术方案文档 */}
-          {panoramaState.visibleCards.includes('doc') && (
-            <motion.div 
-              key="doc"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('doc')}>
-                <span className="font-medium text-slate-800 text-sm">技术方案文档</span>
-                <ChevronRight size={16} className="text-slate-400" />
-              </div>
-            </motion.div>
-          )}
-
-          {/* 代码变更 */}
-          {panoramaState.visibleCards.includes('code') && (
-            <motion.div 
-              key="code"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('code')}>
-                <span className="font-medium text-slate-800 text-sm">代码变更</span>
-                <div className="flex items-center gap-2">
-                  <Upload size={14} className="text-slate-400" />
-                  <span className="text-xs font-medium text-slate-700 bg-slate-100 px-1.5 rounded">+{panoramaState.data?.code?.added || 0}</span>
-                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-1.5 rounded">-{panoramaState.data?.code?.removed || 0}</span>
-                  <ChevronDown size={16} className="text-slate-400" />
-                </div>
-              </div>
-              <div className="px-4 pb-3 space-y-2">
-                {panoramaState.data?.code?.files?.map(file => (
-                  <div key={file.name} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 overflow-hidden">
-                      <Box size={14} className="text-slate-600 shrink-0" />
-                      <span className="text-slate-700 truncate">{file.name}</span>
-                      <span className="text-xs text-slate-400 truncate">{file.path}</span>
-                    </div>
-                    <span className={`text-xs font-bold ${file.status === 'A' ? 'text-slate-700' : file.status === 'M' ? 'text-slate-800' : 'text-slate-500'} shrink-0 ml-2`}>{file.status}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          )}
-
-          {/* 合并请求 */}
-          {panoramaState.visibleCards.includes('pr') && (
-            <motion.div 
-              key="pr"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('pr')}>
-                <span className="font-medium text-slate-800 text-sm">合并请求</span>
-                <ChevronDown size={16} className="text-slate-400" />
-              </div>
-              <div className="px-4 pb-4">
-                <div className="text-xs font-medium text-slate-800 mb-1">#{panoramaState.data?.pr?.id || 27} {panoramaState.data?.pr?.title || 'feat: 首页增加一家渐入动效'}</div>
-                <div className="flex items-center gap-1.5 mb-3">
-                  <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" className="w-4 h-4 rounded-full bg-slate-200" />
-                  <span className="text-xs text-slate-500">{panoramaState.data?.pr?.author || '崇启'} · 创建于{panoramaState.data?.pr?.createdAt || '6天前'}</span>
-                </div>
-                
-                <div className="flex items-center gap-2 text-xs text-slate-600 bg-slate-50 p-2 rounded-md border border-slate-100 mb-3">
-                  <span className="truncate max-w-[100px]">{panoramaState.data?.pr?.sourceBranch || 'neoswift/home-fade-in-animati...'}</span>
-                  <GitPullRequest size={12} className="text-slate-400 shrink-0" />
-                  <span className="truncate max-w-[100px]">{panoramaState.data?.pr?.targetBranch || 'sprint_neovateweb_S09001137...'}</span>
-                </div>
-                
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-3 text-xs text-slate-700 mb-3">
-                  <div className="font-medium mb-1">由 NeoSwift 自动创建</div>
-                  <div className="font-medium mt-2 mb-1">变更总结</div>
-                  <p className="text-slate-600 leading-relaxed">{panoramaState.data?.pr?.summary || '为首页添加了渐入动效，提升了页面加载时的视觉体验。主要变更包括：引入动效库、配置渐入动画参数、优化加载性能。'}</p>
-                  <div className="mt-2 text-slate-500 break-all">
-                    任务详情：https://NeoSwift-studio.antgroup-inc.cn/session/kk3dum71zg9l7fu4
+                  <div className="pt-2 text-slate-300 group-hover:text-slate-500 transition-colors">
+                    <ChevronRight size={16} />
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1 text-slate-500">
-                    <FileText size={12} />
-                    {panoramaState.data?.code?.files?.length || 0} files
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-500">自动创建 MR：</span>
-                    <span className="text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">已开启</span>
-                    <span className="text-slate-800 font-medium cursor-pointer">前往设置</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* 部署产物 */}
-          {panoramaState.visibleCards.includes('deploy') && (
-            <motion.div 
-              key="deploy"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('deploy')}>
-                <span className="font-medium text-slate-800 text-sm">部署产物</span>
-                <ChevronDown size={16} className="text-slate-400" />
-              </div>
-              <div className="px-4 pb-4 space-y-3">
-                {panoramaState.data?.deploy?.map((artifact, index) => (
-                  <div key={index} className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600 w-16 shrink-0">{artifact.type}</span>
-                    <a href="#" className="text-slate-800 font-medium hover:underline truncate mx-2">{artifact.url}</a>
-                    <span className="text-slate-400 shrink-0 flex items-center gap-1">等 {artifact.count} 个 <Download size={12} /></span>
-                  </div>
-                ))}
-                {(!panoramaState.data?.deploy || panoramaState.data.deploy.length === 0) && (
-                  <div className="text-xs text-slate-500 text-center py-2">暂无部署产物</div>
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* UI 检测 */}
-          {panoramaState.visibleCards.includes('ui') && (
-            <motion.div 
-              key="ui"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('ui')}>
-                <span className="font-medium text-slate-800 text-sm">UI 检测</span>
-                <ChevronRight size={16} className="text-slate-400" />
-              </div>
-            </motion.div>
-          )}
-
-          {/* 发布计划 */}
-          {panoramaState.visibleCards.includes('release') && (
-            <motion.div 
-              key="release"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-50" onClick={() => onOpenDetails('release')}>
-                <span className="font-medium text-slate-800 text-sm">发布计划</span>
-                <ChevronRight size={16} className="text-slate-400" />
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            );
+          })}
         </AnimatePresence>
-
       </div>
     </div>
   );

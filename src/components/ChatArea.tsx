@@ -1,4 +1,4 @@
-import { Plus, ArrowUp, X, ChevronDown, Lightbulb, Check, FileText, Image as ImageIcon, Box, GitBranch, ChevronLeft, ChevronRight, CheckCircle2, Circle, Upload, GitPullRequest, Download, ExternalLink, Bot, Settings2 } from 'lucide-react';
+import { Plus, ArrowUp, X, ChevronDown, Lightbulb, Check, FileText, Image as ImageIcon, Box, GitBranch, ChevronLeft, ChevronRight, CheckCircle2, Circle, Upload, GitPullRequest, Download, ExternalLink, Bot, Settings2, Loader2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import Markdown from 'react-markdown';
 import { Session, Message, PanoramaCardType } from '../types';
@@ -179,8 +179,14 @@ function StepMessage({ message }: { message: Message }) {
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3">
-          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 ${isThink ? 'bg-[#8bb4f7]' : 'bg-[#b3d4ff]'}`}>
-            {isThink ? <Lightbulb size={12} className={isPending ? 'animate-pulse' : ''} /> : <Check size={12} strokeWidth={3} />}
+          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white shrink-0 ${isPending ? 'bg-slate-400' : isThink ? 'bg-[#8bb4f7]' : 'bg-[#b3d4ff]'}`}>
+            {isPending ? (
+              <Loader2 size={12} className="animate-spin" />
+            ) : isThink ? (
+              <Lightbulb size={12} />
+            ) : (
+              <Check size={12} strokeWidth={3} />
+            )}
           </div>
           <span className={`text-[13px] ${isThink ? 'text-slate-600' : 'text-slate-600 font-mono'}`}>
             {message.content}

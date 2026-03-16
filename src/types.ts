@@ -9,7 +9,7 @@ export interface Message {
   stepDetails?: string;
 }
 
-export type PanoramaCardType = 'plan' | 'code' | 'pr' | 'deploy' | 'ui' | 'doc' | 'release';
+export type PanoramaCardType = 'plan' | 'code' | 'pr' | 'deploy' | 'ui' | 'doc' | 'release' | 'promote';
 
 export interface PlanItem {
   id: string;
@@ -50,7 +50,9 @@ export interface ReleasePlan {
 }
 
 export interface PanoramaData {
+  planStatus?: 'loading' | 'success';
   plan?: PlanItem[];
+  docStatus?: 'loading' | 'success';
   doc?: {
     title: string;
     content: string;
@@ -60,13 +62,18 @@ export interface PanoramaData {
       dependencies?: { name: string; version: string; action: string }[];
     };
   };
+  codeStatus?: 'loading' | 'success';
   code?: {
     added: number;
     removed: number;
     files: CodeChange[];
   };
+  prStatus?: 'pending' | 'loading' | 'success' | 'merged';
   pr?: PRDetails;
+  deployStatus?: 'loading' | 'success';
   deploy?: DeployArtifact[];
+  uiStatus?: 'loading' | 'success';
+  releaseStatus?: 'loading' | 'success';
   release?: ReleasePlan;
 }
 
