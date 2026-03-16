@@ -1,4 +1,4 @@
-import { ArrowUp, Plus, ChevronDown, X, FileText, Image as ImageIcon, Box, GitBranch } from 'lucide-react';
+import { ArrowUp, Plus, ChevronDown, X, FileText, Image as ImageIcon, Box, GitBranch, Bot, Settings2 } from 'lucide-react';
 import { useState, useRef } from 'react';
 import DimaModal, { Requirement } from './DimaModal';
 import AppIterationModal, { AppIteration } from './AppIterationModal';
@@ -22,6 +22,10 @@ export default function EmptyChat({ onNewSession }: { onNewSession: (message: st
   const [selectedReqs, setSelectedReqs] = useState<Requirement[]>([]);
   const [selectedApp, setSelectedApp] = useState<AppIteration | null>(null);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [selectedModel, setSelectedModel] = useState('Gemini 3.1 Pro');
+  const [selectedMode, setSelectedMode] = useState('默认');
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [isModeDropdownOpen, setIsModeDropdownOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = () => {
@@ -104,113 +108,167 @@ export default function EmptyChat({ onNewSession }: { onNewSession: (message: st
         
         <h1 className="text-4xl font-serif text-slate-800 mb-10 tracking-tight">告诉我，今天我们一起创造点什么？</h1>
         
-        <div className="w-full bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mb-8 transition-all focus-within:border-slate-400 focus-within:ring-1 focus-within:ring-slate-400 focus-within:shadow-md">
-          {(selectedReqs.length > 0 || attachments.length > 0 || selectedApp) && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {selectedApp && (
-                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border ${
-                  selectedApp.type === 'app' ? 'bg-slate-100 text-slate-800 border-slate-200' : 'bg-slate-100 text-slate-800 border-slate-200'
-                }`}>
-                  {selectedApp.type === 'app' ? <Box size={14} /> : <GitBranch size={14} />}
-                  <span className="truncate max-w-[200px]">{selectedApp.name}</span>
-                  <button 
-                    onClick={() => setSelectedApp(null)}
-                    className="ml-1 p-0.5 rounded-md hover:bg-white/50 text-slate-400 hover:text-slate-600"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              )}
-              {selectedReqs.map(req => (
-                <div 
-                  key={req.id} 
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border ${
-                    req.type === 'bug' 
-                      ? 'bg-slate-100 text-slate-800 border-slate-200' 
-                      : 'bg-slate-100 text-slate-800 border-slate-200'
-                  }`}
-                >
-                  {req.type === 'bug' ? (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                  )}
-                  <span className="truncate max-w-[200px]">{req.title}</span>
-                  <button 
-                    onClick={() => removeReq(req.id)}
-                    className={`ml-1 p-0.5 rounded-md hover:bg-white/50 ${
-                      req.type === 'bug' ? 'text-slate-500 hover:text-slate-700' : 'text-slate-500 hover:text-slate-700'
+        <div className="w-full flex flex-col gap-2 mb-8">
+          <div className="w-full bg-white rounded-2xl p-3 shadow-sm border border-slate-200 transition-all focus-within:border-slate-400 focus-within:ring-1 focus-within:ring-slate-400 focus-within:shadow-md">
+            {(selectedReqs.length > 0 || attachments.length > 0) && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {selectedReqs.map(req => (
+                  <div 
+                    key={req.id} 
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border ${
+                      req.type === 'bug' 
+                        ? 'bg-slate-100 text-slate-800 border-slate-200' 
+                        : 'bg-slate-100 text-slate-800 border-slate-200'
                     }`}
                   >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-              {attachments.map(attachment => (
-                <div 
-                  key={attachment.id}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl text-xs font-medium border bg-slate-50 text-slate-600 border-slate-100"
-                >
-                  {attachment.previewUrl ? (
-                    <img src={attachment.previewUrl} className="w-4 h-4 rounded object-cover" alt="" referrerPolicy="no-referrer" />
-                  ) : (
-                    <FileText size={14} className="text-slate-400" />
-                  )}
-                  <span className="truncate max-w-[150px]">{attachment.file.name}</span>
-                  <button 
-                    onClick={() => removeAttachment(attachment.id)}
-                    className="ml-1 p-0.5 rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600"
+                    {req.type === 'bug' ? (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                    ) : (
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    )}
+                    <span className="truncate max-w-[200px]">{req.title}</span>
+                    <button 
+                      onClick={() => removeReq(req.id)}
+                      className={`ml-1 p-0.5 rounded-md hover:bg-white/50 ${
+                        req.type === 'bug' ? 'text-slate-500 hover:text-slate-700' : 'text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+                {attachments.map(attachment => (
+                  <div 
+                    key={attachment.id}
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl text-xs font-medium border bg-slate-50 text-slate-600 border-slate-100"
                   >
-                    <X size={14} />
+                    {attachment.previewUrl ? (
+                      <img src={attachment.previewUrl} className="w-4 h-4 rounded object-cover" alt="" referrerPolicy="no-referrer" />
+                    ) : (
+                      <FileText size={14} className="text-slate-400" />
+                    )}
+                    <span className="truncate max-w-[150px]">{attachment.file.name}</span>
+                    <button 
+                      onClick={() => removeAttachment(attachment.id)}
+                      className="ml-1 p-0.5 rounded-md hover:bg-slate-200 text-slate-400 hover:text-slate-600"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <textarea 
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="说出你的想法（可使用 @ 添加上下文；使用 / 唤起命令）"
+              className="w-full resize-none outline-none text-sm min-h-[60px] max-h-[200px] text-slate-700 placeholder:text-slate-400 bg-transparent"
+              rows={3}
+            />
+            <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <button 
+                    onClick={() => { setIsModelDropdownOpen(!isModelDropdownOpen); setIsModeDropdownOpen(false); }}
+                    className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Bot size={14} />
+                    {selectedModel}
+                    <ChevronDown size={12} className="opacity-50" />
                   </button>
+                  {isModelDropdownOpen && (
+                    <div className="absolute bottom-full left-0 mb-1 w-40 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50">
+                      {['Gemini 3.1 Pro', 'Gemini 3.1 Flash', 'Claude 3.5 Sonnet'].map(model => (
+                        <button
+                          key={model}
+                          onClick={() => { setSelectedModel(model); setIsModelDropdownOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors ${selectedModel === model ? 'text-blue-600 font-medium' : 'text-slate-700'}`}
+                        >
+                          {model}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-          <textarea 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="告诉我你的研发任务，我来帮你搞定它～"
-            className="w-full resize-none outline-none text-lg min-h-[100px] text-slate-700 placeholder:text-slate-400 bg-transparent"
-          />
-          <div className="flex items-center justify-between mt-2 pt-2">
-            <div className="flex items-center gap-2">
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
-                multiple 
-                onChange={handleFileChange}
-              />
-              <button 
-                onClick={handleFileClick}
-                className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors"
-              >
-                <Plus size={20} strokeWidth={1.5} />
-              </button>
-              <button 
-                onClick={() => setIsAppModalOpen(true)}
-                className="flex items-center gap-1 text-sm font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full transition-colors"
-              >
-                {selectedApp ? selectedApp.name : '应用/迭代'} <ChevronDown size={14} className="text-slate-400" />
-              </button>
-            </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setIsDimaModalOpen(true)}
-                className="text-sm font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 px-4 py-2 rounded-full transition-colors"
-              >
-                Dima
-              </button>
+
+                <div className="relative">
+                  <button 
+                    onClick={() => { setIsModeDropdownOpen(!isModeDropdownOpen); setIsModelDropdownOpen(false); }}
+                    className="flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 px-2.5 py-1.5 rounded-lg transition-colors"
+                  >
+                    <Settings2 size={14} />
+                    {selectedMode}
+                    <ChevronDown size={12} className="opacity-50" />
+                  </button>
+                  {isModeDropdownOpen && (
+                    <div className="absolute bottom-full left-0 mb-1 w-32 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50">
+                      {['默认', '全自动', '自动编排', '计划'].map(mode => (
+                        <button
+                          key={mode}
+                          onClick={() => { setSelectedMode(mode); setIsModeDropdownOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors ${selectedMode === mode ? 'text-blue-600 font-medium' : 'text-slate-700'}`}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="w-px h-4 bg-slate-200 mx-1" />
+
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  multiple 
+                  onChange={handleFileChange}
+                />
+                <button 
+                  onClick={handleFileClick}
+                  className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-50 transition-colors"
+                >
+                  <Plus size={18} />
+                </button>
+                <button 
+                  onClick={() => setIsDimaModalOpen(true)}
+                  className="text-xs font-medium text-slate-600 bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-full transition-colors"
+                >
+                  Dima
+                </button>
+              </div>
               <button 
                 onClick={handleSend}
                 disabled={!input.trim() && selectedReqs.length === 0 && attachments.length === 0 && !selectedApp}
-                className="w-10 h-10 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ArrowUp size={20} strokeWidth={2} />
+                <ArrowUp size={16} />
               </button>
             </div>
+          </div>
+
+          <div className="flex items-center px-1">
+            {selectedApp ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border bg-white text-slate-800 border-slate-200 shadow-sm">
+                {selectedApp.type === 'app' ? <Box size={12} /> : <GitBranch size={12} />}
+                <span className="truncate max-w-[200px]">{selectedApp.name}</span>
+                <button 
+                  onClick={() => setSelectedApp(null)}
+                  className="ml-1 p-0.5 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => setIsAppModalOpen(true)}
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-white hover:bg-slate-50 px-3 py-1.5 rounded-xl transition-colors border border-slate-200 shadow-sm"
+              >
+                <Plus size={12} />
+                选择应用/迭代
+              </button>
+            )}
           </div>
         </div>
         
