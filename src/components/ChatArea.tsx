@@ -27,10 +27,10 @@ function MessageArtifactCard({
     switch (type) {
       case 'plan':
         return {
-          icon: <CheckCircle2 size={16} className="text-slate-800" />,
-          title: '任务步骤',
+          icon: <CheckCircle2 size={16} className="text-blue-600" />,
+          title: '计划 (Plan)',
           content: `${data?.plan?.filter(p => p.status === 'completed')?.length || 0} / ${data?.plan?.length || 0} 已完成`,
-          color: 'bg-slate-100 border-slate-200 text-slate-800'
+          color: 'bg-blue-50 border-blue-100 text-blue-900'
         };
       case 'doc':
         return {
@@ -81,6 +81,36 @@ function MessageArtifactCard({
 
   const config = getCardConfig();
   if (!config) return null;
+
+  if (type === 'plan') {
+    return (
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick();
+        }}
+        className={`mt-4 mb-2 flex flex-col gap-2 p-4 rounded-xl border shadow-sm cursor-pointer hover:shadow-md transition-all group max-w-md ${config.color}`}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm shrink-0">
+            {config.icon}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-bold tracking-wide">{config.title}</div>
+            <div className="text-xs opacity-80 mt-0.5">点击查看详细计划与进度</div>
+          </div>
+          <div className="text-blue-400 group-hover:text-blue-600 transition-colors bg-white p-1.5 rounded-full shadow-sm">
+            <ExternalLink size={14} />
+          </div>
+        </div>
+        
+        <div className="mt-2 bg-white/60 rounded-lg p-2.5 flex items-center justify-between">
+          <div className="text-xs font-medium opacity-80">当前进度</div>
+          <div className="text-sm font-bold">{config.content}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 

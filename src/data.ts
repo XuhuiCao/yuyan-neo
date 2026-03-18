@@ -252,3 +252,25 @@ export const initialSessions: Session[] = [
     messages: []
   }
 ];
+
+// Generate mock data for simulation
+const appNames = ['Neovate Web', 'Admin Dashboard', 'Auth Service', 'Legacy App', '未分组'];
+const statuses = ['进行中', '已完结', '待操作', '已取消', '有异常'];
+
+for (let i = 7; i <= 50; i++) {
+  initialSessions.push({
+    id: `${i}`,
+    title: `模拟对话任务测试 ${i}`,
+    time: `3月${Math.floor(Math.random() * 30 + 1)}日`,
+    status: statuses[Math.floor(Math.random() * statuses.length)] as any,
+    added: Math.floor(Math.random() * 100),
+    removed: Math.floor(Math.random() * 50),
+    appName: appNames[Math.floor(Math.random() * appNames.length)],
+    isArchived: Math.random() > 0.8,
+    panoramaState: {
+      status: 'ready',
+      visibleCards: ['plan']
+    },
+    messages: []
+  });
+}

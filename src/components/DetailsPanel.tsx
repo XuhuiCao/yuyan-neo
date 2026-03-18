@@ -242,7 +242,7 @@ export default function DetailsPanel({
   }, [autoCreatePR]);
 
   const allTabs: { id: PanoramaCardType, label: string }[] = [
-    { id: 'plan', label: '任务步骤' },
+    { id: 'plan', label: '计划 (Plan)' },
     { id: 'doc', label: '技术方案文档' },
     { id: 'code', label: '代码变更' },
     { id: 'pr', label: '合并请求' },

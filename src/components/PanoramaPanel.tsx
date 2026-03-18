@@ -24,7 +24,7 @@ export default function PanoramaPanel({
       case 'plan':
         return {
           icon: <CheckCircle2 size={18} />,
-          title: '任务步骤',
+          title: '计划 (Plan)',
           status: data.planStatus === 'loading' ? '生成中' : '已就绪',
           statusColor: data.planStatus === 'loading' ? 'text-blue-500 bg-blue-50' : 'text-emerald-600 bg-emerald-50',
           desc: `${data.plan?.filter(p => p.status === 'completed').length || 0}/${data.plan?.length || 0} 步骤已完成`,
@@ -240,6 +240,35 @@ export default function PanoramaPanel({
           {panoramaState.visibleCards.map((cardType) => {
             const config = getCardContent(cardType);
             if (!config) return null;
+
+            if (cardType === 'plan') {
+              return (
+                <motion.div 
+                  key={cardType}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  onClick={() => onOpenDetails(cardType)}
+                  className="bg-blue-50 rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group mb-4 relative"
+                >
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-blue-100 rounded-bl-full -z-10 opacity-50"></div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 text-blue-800 font-bold">
+                        {config.isLoading ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle2 size={18} />}
+                        <span>{config.title}</span>
+                      </div>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${config.statusColor}`}>
+                        {config.status}
+                      </span>
+                    </div>
+                    <div className="bg-white/60 rounded-lg p-3 text-sm text-blue-900 flex items-center justify-between">
+                      <span className="opacity-80">当前进度</span>
+                      <span className="font-bold">{config.desc}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            }
 
             return (
               <motion.div 

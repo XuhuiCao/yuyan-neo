@@ -75,7 +75,6 @@ export default function App() {
   const [activeDetailsTab, setActiveDetailsTab] = useState<PanoramaCardType | null>(null);
   const [isPanoramaOpen, setIsPanoramaOpen] = useState(false);
   const [lastSessionId, setLastSessionId] = useState<string | null>(null);
-  const [renameSession, setRenameSession] = useState<{id: string, title: string} | null>(null);
   const [deleteSessionId, setDeleteSessionId] = useState<string | null>(null);
   const [chatInput, setChatInput] = useState('');
 
@@ -1052,14 +1051,14 @@ export default function App() {
             setActiveDetailsTab(null);
           }} 
           onArchiveSession={handleArchiveSession}
-          onRenameSession={(id) => {
-            const session = sessions.find(s => s.id === id);
-            if (session) {
-              setRenameSession({id, title: session.title});
-            }
+          onRenameSession={(id, newTitle) => {
+            setSessions(prev => prev.map(s => s.id === id ? { ...s, title: newTitle } : s));
           }}
           onDeleteSession={(id) => {
             setDeleteSessionId(id);
+          }}
+          onPinSession={(id) => {
+            setSessions(prev => prev.map(s => s.id === id ? { ...s, isPinned: !s.isPinned } : s));
           }}
         />
         
@@ -1157,28 +1156,6 @@ export default function App() {
           <span>权益保障承诺书ICP 证浙 B2-2-100257Copyright © 2020 蚂蚁集团</span>
         </div>
       </footer>
-
-      {renameSession && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-2xl shadow-xl w-80">
-            <h3 className="text-lg font-medium mb-4">重命名任务</h3>
-            <input 
-              type="text" 
-              value={renameSession.title} 
-              onChange={(e) => setRenameSession({...renameSession, title: e.target.value})} 
-              className="w-full border border-slate-200 rounded-lg p-2 mb-4"
-              autoFocus
-            />
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setRenameSession(null)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg">取消</button>
-              <button onClick={() => {
-                setSessions(prev => prev.map(s => s.id === renameSession.id ? { ...s, title: renameSession.title } : s));
-                setRenameSession(null);
-              }} className="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-slate-800">确定</button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {deleteSessionId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">

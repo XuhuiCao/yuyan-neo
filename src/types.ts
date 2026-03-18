@@ -86,6 +86,7 @@ export interface Session {
   removed: number;
   appName?: string;
   isArchived?: boolean;
+  isPinned?: boolean;
   messages: Message[];
   panoramaState: {
     status: 'preparing' | 'ready';
