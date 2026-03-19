@@ -11,7 +11,7 @@ export const initialSessions: Session[] = [
     appName: 'Neovate Web',
     panoramaState: {
       status: 'ready',
-      visibleCards: ['plan', 'code', 'pr', 'deploy', 'ui']
+      visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
     },
     messages: [
       {
@@ -96,7 +96,7 @@ export const initialSessions: Session[] = [
     appName: 'Admin Dashboard',
     panoramaState: {
       status: 'ready',
-      visibleCards: ['plan', 'code', 'pr', 'deploy', 'ui']
+      visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
     },
     messages: [
       {
@@ -182,7 +182,7 @@ export const initialSessions: Session[] = [
     isArchived: true,
     panoramaState: {
       status: 'ready',
-      visibleCards: ['plan', 'code', 'pr', 'deploy', 'ui']
+      visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
     },
     messages: [
       {

@@ -57,15 +57,21 @@ function generateSimulationData(message: string): PanoramaData {
     createdAt: '刚刚',
     sourceBranch: `feature/ai-${Date.now().toString().slice(-6)}`,
     targetBranch: 'master',
-    summary: `### 变更背景\n${message || '根据用户指令进行代码优化。'}\n\n### 修改内容\n- **逻辑层**：${isBug ? '修复了边界条件下的异常处理' : '重构了核心业务组件，提升可维护性'}\n- **表现层**：${isStyle ? '优化了响应式布局与色彩体系' : '增加了交互反馈与加载状态'}\n- **工程化**：更新了相关依赖版本，确保环境一致性\n\n### 验证建议\n- 重点关注部署产物中的交互表现\n- 检查不同屏幕尺寸下的兼容性`
+    summary: `### 变更背景\n${message || '根据用户指令进行代码优化。'}\n\n### 修改内容\n- **逻辑层**：${isBug ? '修复了边界条件下的异常处理' : '重构了核心业务组件，提升可维护性'}\n- **表现层**：${isStyle ? '优化了响应式布局与色彩体系' : '增加了交互反馈与加载状态'}\n- **工程化**：更新了相关依赖版本，确保环境一致性\n\n### 验证建议\n- 重点关注部署环境中的交互表现\n- 检查不同屏幕尺寸下的兼容性`
+  };
+
+  const build = {
+    duration: '45s',
+    artifacts: [
+      { name: 'dist.zip', url: `https://cdn.neovate.dev/artifacts/${Date.now().toString().slice(-6)}.zip`, size: '2.4 MB' }
+    ]
   };
 
   const deploy = [
     { type: '预发环境 (Staging)', url: `https://staging-${Date.now().toString().slice(-6)}.neovate.dev`, count: 1 },
-    { type: '构建产物 (Build)', url: `https://cdn.neovate.dev/artifacts/${Date.now().toString().slice(-6)}.zip`, count: 1 },
   ];
 
-  return { plan, doc, code, pr, deploy };
+  return { plan, doc, code, pr, build, deploy };
 }
 
 export default function App() {
@@ -102,6 +108,7 @@ export default function App() {
     const step3Id = crypto.randomUUID();
     const step4Id = crypto.randomUUID();
     const step5Id = crypto.randomUUID();
+    const stepBuildId = crypto.randomUUID();
     const step6Id = crypto.randomUUID();
     const step7Id = crypto.randomUUID();
 
@@ -350,7 +357,39 @@ export default function App() {
               { 
                 id: crypto.randomUUID(), 
                 role: 'ai', 
-                content: '合并请求已合并，正在部署至预发环境...', 
+                content: '合并请求已合并，正在进行构建...', 
+                timestamp: new Date().toISOString(),
+              },
+              { id: stepBuildId, role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
+            ],
+            panoramaState: { 
+              ...s.panoramaState, 
+              visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'build'])),
+              data: { 
+                ...s.panoramaState.data, 
+                prStatus: 'merged',
+                buildStatus: 'loading'
+              } 
+            }
+          };
+        }));
+      }, 9500);
+
+      setTimeout(() => {
+        const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
+        if (!isAutoCreatePR) return;
+        setSessions(prev => prev.map(s => {
+          if (s.id !== newSession.id) return s;
+          const msgs = s.messages.map(m => m.id === stepBuildId ? { ...m, stepStatus: 'success' as const } : m);
+          return {
+            ...s,
+            messages: [
+              ...msgs,
+              { id: crypto.randomUUID(), role: 'ai-step', stepType: 'tool', stepStatus: 'success', content: 'mcp__trigger_build', stepDetails: '{\n  "status": "success",\n  "duration": "45s"\n}', timestamp: new Date().toISOString() },
+              { 
+                id: crypto.randomUUID(), 
+                role: 'ai', 
+                content: '构建已完成，正在部署至预发环境...', 
                 timestamp: new Date().toISOString(),
               },
               { id: step6Id, role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
@@ -360,13 +399,14 @@ export default function App() {
               visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'deploy'])),
               data: { 
                 ...s.panoramaState.data, 
-                prStatus: 'merged',
+                buildStatus: 'success',
+                build: simData.build,
                 deployStatus: 'loading'
               } 
             }
           };
         }));
-      }, 9500);
+      }, 11500);
 
       setTimeout(() => {
         const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
@@ -401,7 +441,7 @@ export default function App() {
             }
           };
         }));
-      }, 11500);
+      }, 13500);
 
       setTimeout(() => {
         const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
@@ -435,7 +475,7 @@ export default function App() {
             }
           };
         }));
-      }, 13500);
+      }, 15500);
     }
   };
 
@@ -447,6 +487,7 @@ export default function App() {
     const step3Id = crypto.randomUUID();
     const step4Id = crypto.randomUUID();
     const step5Id = crypto.randomUUID();
+    const stepBuildId = crypto.randomUUID();
     const step6Id = crypto.randomUUID();
     const step7Id = crypto.randomUUID();
     
@@ -688,7 +729,39 @@ export default function App() {
               { 
                 id: crypto.randomUUID(), 
                 role: 'ai', 
-                content: '合并请求已合并，正在部署至预发环境...', 
+                content: '合并请求已合并，正在进行构建...', 
+                timestamp: new Date().toISOString(),
+              },
+              { id: stepBuildId, role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
+            ],
+            panoramaState: { 
+              ...s.panoramaState, 
+              visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'build'])),
+              data: { 
+                ...s.panoramaState.data, 
+                prStatus: 'merged',
+                buildStatus: 'loading'
+              } 
+            }
+          };
+        }));
+      }, 9500);
+
+      setTimeout(() => {
+        const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
+        if (!isAutoCreatePR) return;
+        setSessions(prev => prev.map(s => {
+          if (s.id !== currentSessionId) return s;
+          const msgs = s.messages.map(m => m.id === stepBuildId ? { ...m, stepStatus: 'success' as const } : m);
+          return {
+            ...s,
+            messages: [
+              ...msgs,
+              { id: crypto.randomUUID(), role: 'ai-step', stepType: 'tool', stepStatus: 'success', content: 'mcp__trigger_build', stepDetails: '{\n  "status": "success",\n  "duration": "45s"\n}', timestamp: new Date().toISOString() },
+              { 
+                id: crypto.randomUUID(), 
+                role: 'ai', 
+                content: '构建已完成，正在部署至预发环境...', 
                 timestamp: new Date().toISOString(),
               },
               { id: step6Id, role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
@@ -698,13 +771,14 @@ export default function App() {
               visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'deploy'])),
               data: { 
                 ...s.panoramaState.data, 
-                prStatus: 'merged',
+                buildStatus: 'success',
+                build: simData.build,
                 deployStatus: 'loading'
               } 
             }
           };
         }));
-      }, 9500);
+      }, 11500);
 
       setTimeout(() => {
         const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
@@ -739,7 +813,7 @@ export default function App() {
             }
           };
         }));
-      }, 11500);
+      }, 13500);
 
       setTimeout(() => {
         const isAutoCreatePR = JSON.parse(localStorage.getItem('autoCreatePR') ?? 'true');
@@ -773,7 +847,7 @@ export default function App() {
             }
           };
         }));
-      }, 13500);
+      }, 15500);
     }
   };
 
@@ -838,7 +912,37 @@ export default function App() {
             { 
               id: crypto.randomUUID(), 
               role: 'ai', 
-              content: '合并请求已合并，正在部署至预发环境...', 
+              content: '合并请求已合并，正在进行构建...', 
+              timestamp: new Date().toISOString(),
+            },
+            { id: crypto.randomUUID(), role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
+          ],
+          panoramaState: {
+            ...s.panoramaState,
+            visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'build'])),
+            data: {
+              ...s.panoramaState.data,
+              prStatus: 'merged',
+              buildStatus: 'loading'
+            }
+          }
+        };
+      }));
+    }, 4000);
+
+    setTimeout(() => {
+      setSessions(prev => prev.map(s => {
+        if (s.id !== currentSessionId) return s;
+        const msgs = s.messages.map(m => m.stepStatus === 'pending' ? { ...m, stepStatus: 'success' as const } : m);
+        return {
+          ...s,
+          messages: [
+            ...msgs,
+            { id: crypto.randomUUID(), role: 'ai-step', stepType: 'tool', stepStatus: 'success', content: 'mcp__trigger_build', stepDetails: '{\n  "status": "success",\n  "duration": "45s"\n}', timestamp: new Date().toISOString() },
+            { 
+              id: crypto.randomUUID(), 
+              role: 'ai', 
+              content: '构建已完成，正在部署至预发环境...', 
               timestamp: new Date().toISOString(),
             },
             { id: crypto.randomUUID(), role: 'ai-step', stepType: 'think', stepStatus: 'pending', content: '思考中', timestamp: new Date().toISOString() }
@@ -848,13 +952,14 @@ export default function App() {
             visibleCards: Array.from(new Set([...s.panoramaState.visibleCards, 'deploy'])),
             data: {
               ...s.panoramaState.data,
-              prStatus: 'merged',
+              buildStatus: 'success',
+              build: simData.build,
               deployStatus: 'loading'
             }
           }
         };
       }));
-    }, 4000);
+    }, 6000);
 
     setTimeout(() => {
       setSessions(prev => prev.map(s => {
@@ -885,7 +990,7 @@ export default function App() {
           }
         };
       }));
-    }, 6000);
+    }, 8000);
 
     setTimeout(() => {
       setSessions(prev => prev.map(s => {
@@ -914,7 +1019,7 @@ export default function App() {
           }
         };
       }));
-    }, 8000);
+    }, 10000);
   };
 
   const handleUIConfirm = (confirmed: boolean) => {
@@ -1070,7 +1175,7 @@ export default function App() {
               chatInput={chatInput}
               setChatInput={setChatInput}
               onMessageClick={(type) => {
-                if (type && ['plan', 'doc', 'code', 'pr', 'deploy', 'ui', 'release'].includes(type)) {
+                if (type && ['plan', 'doc', 'code', 'pr', 'build', 'deploy', 'ui', 'release'].includes(type)) {
                   const cardType = type as PanoramaCardType;
                   if (!openDetailsTabs.includes(cardType)) {
                     setOpenDetailsTabs([...openDetailsTabs, cardType]);

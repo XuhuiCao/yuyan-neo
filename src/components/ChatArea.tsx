@@ -53,11 +53,18 @@ function MessageArtifactCard({
           content: data?.pr ? `#${data.pr.id} ${data.pr.title}` : '查看合并请求详情',
           color: 'bg-slate-100 border-slate-200 text-slate-800'
         };
+      case 'build':
+        return {
+          icon: <Box size={16} className="text-slate-800" />,
+          title: '构建产物',
+          content: `构建耗时 ${data?.build?.duration || '未知'}`,
+          color: 'bg-slate-100 border-slate-200 text-slate-800'
+        };
       case 'deploy':
         return {
           icon: <Download size={16} className="text-slate-800" />,
-          title: '部署产物',
-          content: data?.deploy?.[0]?.url || '查看部署产物列表',
+          title: '部署环境',
+          content: data?.deploy?.[0]?.url || '查看部署环境列表',
           color: 'bg-slate-100 border-slate-200 text-slate-800'
         };
       case 'ui':

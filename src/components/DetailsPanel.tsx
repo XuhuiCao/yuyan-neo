@@ -246,7 +246,8 @@ export default function DetailsPanel({
     { id: 'doc', label: '技术方案文档' },
     { id: 'code', label: '代码变更' },
     { id: 'pr', label: '合并请求' },
-    { id: 'deploy', label: '部署产物' },
+    { id: 'build', label: '构建产物' },
+    { id: 'deploy', label: '部署环境' },
     { id: 'ui', label: 'UI 检测' },
     { id: 'release', label: '发布计划' },
   ];
@@ -495,6 +496,39 @@ export default function DetailsPanel({
           </div>
         )}
 
+        {activeTab === 'build' && (
+          panoramaState?.data?.buildStatus === 'loading' ? (
+            <div className="flex flex-col items-center justify-center h-full py-20 text-slate-500 gap-3">
+              <Loader2 size={24} className="animate-spin" />
+              <span className="text-sm">正在进行代码构建...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <h3 className="font-medium text-slate-800 mb-4">构建产物</h3>
+              <div className="space-y-3">
+                {panoramaState.data?.build?.artifacts?.map((artifact, index) => (
+                  <div key={index} className="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-medium text-slate-800 flex items-center gap-2">
+                        <Box size={16} className="text-slate-500" />
+                        {artifact.name}
+                      </div>
+                      <span className="text-xs text-slate-500">{artifact.size}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <a href="#" className="text-xs text-blue-600 hover:underline break-all flex items-center gap-1">
+                        <Download size={12} />
+                        下载产物
+                      </a>
+                      <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">Success</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        )}
+
         {activeTab === 'deploy' && (
           panoramaState?.data?.deployStatus === 'loading' ? (
             <div className="flex flex-col items-center justify-center h-full py-20 text-slate-500 gap-3">
@@ -503,7 +537,7 @@ export default function DetailsPanel({
             </div>
           ) : (
             <div className="space-y-4">
-              <h3 className="font-medium text-slate-800 mb-4">部署产物</h3>
+              <h3 className="font-medium text-slate-800 mb-4">部署环境</h3>
               <div className="space-y-3">
                 {panoramaState.data?.deploy?.map((artifact, index) => (
                   <div key={index} className="p-3 border border-slate-200 rounded-lg bg-slate-50">

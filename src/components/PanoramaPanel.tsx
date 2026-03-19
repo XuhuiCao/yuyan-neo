@@ -77,6 +77,31 @@ export default function PanoramaPanel({
           desc: pDesc,
           isLoading: pLoading
         };
+      case 'build':
+        let bStatus = '待构建';
+        let bColor = 'text-amber-600 bg-amber-50';
+        let bDesc = '等待代码合并后构建';
+        let bLoading = false;
+        
+        if (data.buildStatus === 'loading') {
+          bStatus = '构建中';
+          bColor = 'text-blue-500 bg-blue-50';
+          bDesc = '正在进行代码构建...';
+          bLoading = true;
+        } else if (data.buildStatus === 'success') {
+          bStatus = '已构建';
+          bColor = 'text-emerald-600 bg-emerald-50';
+          bDesc = `构建成功，耗时 ${data.build?.duration || '未知'}`;
+        }
+
+        return {
+          icon: <Box size={18} />,
+          title: '构建产物',
+          status: bStatus,
+          statusColor: bColor,
+          desc: bDesc,
+          isLoading: bLoading
+        };
       case 'deploy':
         let dStatus = '待部署';
         let dColor = 'text-amber-600 bg-amber-50';
@@ -96,7 +121,7 @@ export default function PanoramaPanel({
 
         return {
           icon: <ImageIcon size={18} />,
-          title: '部署产物',
+          title: '部署环境',
           status: dStatus,
           statusColor: dColor,
           desc: dDesc,
