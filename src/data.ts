@@ -9,6 +9,7 @@ export const initialSessions: Session[] = [
     added: 303,
     removed: 0,
     appName: 'Neovate Web',
+    location: 'cloud',
     panoramaState: {
       status: 'ready',
       visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
@@ -94,6 +95,7 @@ export const initialSessions: Session[] = [
     added: 12,
     removed: 3,
     appName: 'Admin Dashboard',
+    location: 'local',
     panoramaState: {
       status: 'ready',
       visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
@@ -180,6 +182,7 @@ export const initialSessions: Session[] = [
     removed: 12,
     appName: 'Neovate Web',
     isArchived: true,
+    location: 'cloud',
     panoramaState: {
       status: 'ready',
       visibleCards: ['plan', 'code', 'pr', 'build', 'deploy', 'ui']
@@ -217,6 +220,7 @@ export const initialSessions: Session[] = [
     added: 24,
     removed: 4,
     appName: 'Neovate Web',
+    location: 'local',
     panoramaState: {
       status: 'preparing',
       visibleCards: ['plan']
@@ -231,6 +235,7 @@ export const initialSessions: Session[] = [
     added: 0,
     removed: 0,
     appName: 'Auth Service',
+    location: 'cloud',
     panoramaState: {
       status: 'preparing',
       visibleCards: []
@@ -245,6 +250,7 @@ export const initialSessions: Session[] = [
     added: 0,
     removed: 156,
     appName: 'Legacy App',
+    location: 'local',
     panoramaState: {
       status: 'ready',
       visibleCards: ['code']
@@ -267,6 +273,7 @@ for (let i = 7; i <= 50; i++) {
     removed: Math.floor(Math.random() * 50),
     appName: appNames[Math.floor(Math.random() * appNames.length)],
     isArchived: Math.random() > 0.8,
+    location: Math.random() > 0.5 ? 'cloud' : 'local',
     panoramaState: {
       status: 'ready',
       visibleCards: ['plan']

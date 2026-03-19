@@ -1,4 +1,4 @@
-import { Archive, ChevronDown, ChevronRight, Box, Package, Edit2, Trash2, MoreVertical, Search, Loader2, Pin } from 'lucide-react';
+import { Archive, ChevronDown, ChevronRight, Box, Package, Edit2, Trash2, MoreVertical, Search, Loader2, Pin, Cloud, Monitor } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { Session } from '../types';
 
@@ -171,7 +171,14 @@ export default function Sidebar({
         )}
       </div>
       <div className="flex items-center justify-between pl-1">
-        <div className="text-[10px] text-slate-400">{session.time}</div>
+        <div className="flex items-center gap-1.5">
+          {session.location && (
+            <div className="text-slate-400 flex items-center justify-center" title={session.location === 'cloud' ? '云端对话' : '本地对话'}>
+              {session.location === 'cloud' ? <Cloud size={11} strokeWidth={2.5} /> : <Monitor size={11} strokeWidth={2.5} />}
+            </div>
+          )}
+          <div className="text-[10px] text-slate-400">{session.time}</div>
+        </div>
       </div>
       {!session.isArchived && editingSessionId !== session.id && (
         <div className={`absolute top-2 right-2 ${openDropdownId === session.id ? 'flex' : 'hidden group-hover:flex'} items-center gap-0.5 bg-slate-50 rounded-md shadow-sm border border-slate-200 p-0.5 z-10`}>

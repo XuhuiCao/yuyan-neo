@@ -98,6 +98,7 @@ export interface Session {
   appName?: string;
   isArchived?: boolean;
   isPinned?: boolean;
+  location?: 'cloud' | 'local';
   messages: Message[];
   panoramaState: {
     status: 'preparing' | 'ready';
